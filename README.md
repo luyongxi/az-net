@@ -2,7 +2,7 @@
 
 ## Introduction
 This github repository is an implementation of the AZ-Net detection method described in 
-"Adaptive Object Detection Using Adajacency and Zoom Prediction" 
+"Adaptive Object Detection Using Adjacency and Zoom Prediction" 
 
 Created by Yongxi Lu at University of California, San Diego.
 
