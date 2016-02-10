@@ -72,7 +72,7 @@ def _sample_rois(roidb, fg_rois_per_image, rois_per_image):
     examples.
     """   
     zoom_labels = roidb['zoom_gt']
-    rois = roidb['ex_boxes']
+    rois = roidb['ex_boxes'].astype(np.float32, copy=False)
     
     adj_labels = np.zeros((rois.shape[0], cfg.SEAR.NUM_SUBREG))
     adj_matching = roidb['bbox_targets'][:, 4:6].astype(np.uint32, copy=False)
