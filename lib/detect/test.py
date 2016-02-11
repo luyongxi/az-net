@@ -350,7 +350,7 @@ def im_propose(net, im, return_conv = False, num_proposals = None):
     # the current set of regions
     B = np.array([[0, 0, im.shape[1]-1.0, im.shape[0]-1.0]])
     # the set for zoom in
-    Z = B
+    Z = np.vstack((B, divide_region(B)))
     # the set of region proposals from adjacent predictions
     Y = np.zeros((0, 4))
     # confidence scores of adjacent predictions
@@ -363,11 +363,10 @@ def im_propose(net, im, return_conv = False, num_proposals = None):
     side = np.minimum(height, width)
     K = int(np.log2(side/cfg.SEAR.MIN_SIDE) + 1.0)
     # threshold at zoom indicator
-    Tz = 0
-    step = cfg.SEAR.Tz/K
+    Tz = cfg.SEAR.Tz
     # cached convolutional layer (the last layer)
     conv = None
-    for k in xrange(K):
+    for k in xrange(1, K):
         # Get zoom indicator and adjacent predictions (w/ confidence)
         # Scores and aBBox already sifted and vectorized by sc_net function
 #        print B.shape[0]
@@ -377,14 +376,15 @@ def im_propose(net, im, return_conv = False, num_proposals = None):
         Y = np.vstack((Y, boxes))
         aScores = np.hstack((aScores, c))
         # Z is updated to regions for zoom in
+        if k==1:    # heuristic: the root region is always divided
+            zoom[0] = 1.0
+                    
         indZ = np.where(zoom >= Tz)[0]
         Z = B[indZ, :]
         if Z.shape[0] == 0:
             break
         # B is updated to be regions that are expanded from it
         B = divide_region(Z)
-#        Tz = Tz + step
-        Tz = cfg.SEAR.Tz
         
     if (cfg.SEAR.FIXED_PROPOSAL_NUM == False) and (num_proposals is None):
         indA = np.where(aScores >= cfg.SEAR.Tc)[0]
@@ -408,7 +408,7 @@ def im_propose(net, im, return_conv = False, num_proposals = None):
         return Y, conv
     else:
         return Y
-    
+
 def im_detect(net, im, boxes, num_classes):
     """Detect object classes in an image given object proposals using Fast R-CNN
     Arguments:
