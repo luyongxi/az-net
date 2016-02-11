@@ -7,7 +7,6 @@
 
 from .imdb import imdb
 from .pascal_voc import pascal_voc
-from .sun_merge import sun_merge
 from .coco import coco
 from . import factory
 
