@@ -87,7 +87,7 @@ if __name__ == '__main__':
     
     # AZ-Net
     az_net = caffe.Net(args.prototxt_az, args.caffemodel_az, caffe.TEST)
-    az_net.name = os.path.splitext(os.path.basename(args.caffemodel_sc))[0]
+    az_net.name = os.path.splitext(os.path.basename(args.caffemodel_az))[0]
     az_net_fc = caffe.Net(args.prototxt_fc_az, args.caffemodel_az, caffe.TEST)
     az_net_fc.name = os.path.splitext(os.path.basename(args.caffemodel_az))[0]
     az_nets = {'full':az_net, 'fc': az_net_fc}
