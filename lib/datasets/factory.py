@@ -10,7 +10,6 @@
 __sets = {}
 
 import datasets.pascal_voc
-import datasets.sun_merge
 import datasets.coco
 import numpy as np
 
