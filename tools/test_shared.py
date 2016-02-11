@@ -74,8 +74,8 @@ if __name__ == '__main__':
     print('Using config:')
     pprint.pprint(cfg)
 
-    while not os.path.exists(args.caffemodel_sc) and args.wait:
-        print('Waiting for {} to exist...'.format(args.caffemodel_sc))
+    while not os.path.exists(args.caffemodel_az) and args.wait:
+        print('Waiting for {} to exist...'.format(args.caffemodel_az))
         time.sleep(10)
         
     while not os.path.exists(args.caffemodel_frcnn) and args.wait:
