@@ -19,7 +19,7 @@ If you find this useful, please consider citing
 
 To install, use the following steps:
 
-1. Install Caffe and all its dependencies. 1. Requirements for `Caffe` and `pycaffe` (see: [Caffe installation instructions](http://caffe.berkeleyvision.org/installation.html))
+1. Install Caffe and all its dependencies. Requirements for `Caffe` and `pycaffe` (see: [Caffe installation instructions](http://caffe.berkeleyvision.org/installation.html))
 
   **Note:** Caffe *must* be built with support for Python layers!
 
