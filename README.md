@@ -15,18 +15,51 @@ If you find this useful, please consider citing
       year={2015}
     }
 
-## Instructions for installation and demos
+## Installation
 
 To install, use the following steps:
 
-1. Install all libraries necessary for Caffe. 
+1. Install Caffe and all its dependencies. 1. Requirements for `Caffe` and `pycaffe` (see: [Caffe installation instructions](http://caffe.berkeleyvision.org/installation.html))
 
-2. Download and compile the "Fast-RCNN" branch of Caffe. Code and detailed instructions available at https://github.com/rbgirshick/fast-rcnn
+  **Note:** Caffe *must* be built with support for Python layers!
 
-3. Fetch ImageNet model using the scripts in $ROOT$/data, following isntructions to create symlink to datasets.
+  ```make
+  # In your Makefile.config, make sure to have this line uncommented
+  WITH_PYTHON_LAYER := 1
+  ```
 
-4. Compile cython utilities by
-cd $ROOT$/lib
-make
+2. Clone the AZ-Net repository. Make sure to use the `--recursive` flag
 
-5. To train and test models, use scripts in $ROOT$/experiments/scripts
+  ```Shell
+  # Make sure to clone with --recursive
+  git clone --recursive https://github.com/rbgirshick/fast-rcnn.git
+  ```
+
+3. Build the Cython modules
+
+    ```Shell
+    cd $ROOT/lib
+    make
+    ```
+
+4. Build Caffe and pycaffe
+    ```Shell
+    cd $ROOT/caffe-fast-rcnn
+    # Now follow the Caffe installation instructions here:
+    #   http://caffe.berkeleyvision.org/installation.html
+
+    # If you're experienced with Caffe and have all of the requirements installed
+    # and your Makefile.config in place, then simply do:
+    make -j8 && make pycaffe
+    ```
+
+5. Fetch ImageNet models
+
+    ```Shell
+    cd $ROOT
+    ./data/scripts/fetch_imagenet_models.sh
+    ```
+    
+    See `data/README.md` for details.
+
+6. To train and test models, use scripts in $ROOT/experiments/scripts
