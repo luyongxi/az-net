@@ -15,17 +15,17 @@ If you find this useful, please consider citing
       year={2015}
     }
 
-## Insruction for installation and demos
+## Instructions for installation and demos
 
-To install, use the following the steps:
+To install, use the following steps:
 
 1. Install all libraries necessary for Caffe. 
 
 2. Download and compile the "Fast-RCNN" branch of Caffe. Code and detailed instructions available at https://github.com/rbgirshick/fast-rcnn
 
-3. Fetch ImageNet model using the scripts in /data, following isntructions to create symlink to datasets.
+3. Fetch ImageNet model using the scripts in $ROOT$/data, following isntructions to create symlink to datasets.
 
-4. Compile cython utilitiles by
+4. Compile cython utilities by
 cd $ROOT$/lib
 make
 
