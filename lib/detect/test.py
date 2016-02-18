@@ -9,7 +9,7 @@
 # Written by Ross Girshick
 # --------------------------------------------------------
 
-"""Test using SC-Net on an imdb (image database)."""
+"""Test using AZ-Net on an imdb (image database)."""
 
 from detect.config import cfg, get_output_dir
 from utils.timer import Timer
@@ -225,14 +225,16 @@ def _az_forward(net, im, all_boxes, conv = None):
             blobs_out = net['full'].forward(data=blobs['data'].astype(np.float32, copy=False),
                                             rois=blobs['rois'].astype(np.float32, copy=False),
                                             blobs = [conv_name])
-            conv = blobs_out[conv_name]
-        else:
-            net['fc'].blobs['conv'].reshape(*(conv.shape))
-            net['fc'].blobs['rois'].reshape(*(blobs['rois'].shape))
-            blobs_out = net['fc'].forward(conv=conv.astype(np.float32, copy=False),
-                                            rois=blobs['rois'].astype(np.float32, copy=False))
+            conv = {name: blobs_out[name] for name in conv_name}
+        else:            
+            for name in conv_name:
+                net['fc'].blobs[name].reshape(*(conv[name].shape))
             
-        z_tb = blobs_out['zoom_prob'] 
+            net['fc'].blobs['rois'].reshape(*(blobs['rois'].shape))
+            blobs_out = net['fc'].forward(rois=blobs['rois'].astype(np.float32, copy=False),
+                                          **(conv))
+            
+        z_tb = blobs_out['zoom_prob']
          
         # adjacent predictions  
         pred_scores = blobs_out['adj_prob']
@@ -291,12 +293,13 @@ def _frcnn_forward(net, im, all_boxes, num_classes, conv = None):
             blobs_out = net['full'].forward(data=blobs['data'].astype(np.float32, copy=False),
                                             rois=blobs['rois'].astype(np.float32, copy=False),
                                             blobs = [conv_name])
-            conv = blobs_out[conv_name]
+            conv = {name: blobs_out[name] for name in conv_name}
         else:
-            net['fc'].blobs['conv'].reshape(*(conv.shape))
+            for name in conv_name:
+                net['fc'].blobs[name].reshape(*(conv[name].shape))
             net['fc'].blobs['rois'].reshape(*(blobs['rois'].shape))
-            blobs_out = net['fc'].forward(conv=conv.astype(np.float32, copy=False),
-                                            rois=blobs['rois'].astype(np.float32, copy=False))
+            blobs_out = net['fc'].forward(rois=blobs['rois'].astype(np.float32, copy=False),
+                                          **(conv))
             
         # adjacent predictions  
         pred_scores = blobs_out['cls_prob']

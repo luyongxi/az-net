@@ -181,7 +181,7 @@ __C.SEAR.MIN_SIDE = 10
 __C.SEAR.BATCH_SIZE = 10000
 
 # name of the last convolutional layer (determined by which model is used)
-__C.SEAR.LAST_CONV = 'conv5'
+__C.SEAR.LAST_CONV = ['conv5_3']
 
 #
 # MISC

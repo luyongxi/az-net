@@ -1,0 +1,5 @@
+1. Modify lib/detect/test.py to support skipping. This may affect other files calling functions in test.py. (done)
+
+2. Write training/testing scripts to test skip layers on VOC 2007.
+
+3. Modify .prototxt files for MSCOCO. 

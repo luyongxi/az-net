@@ -1,19 +1,19 @@
 name: "VGG_ILSVRC_16_layers"
-input: "conv3"
+input: "conv3_3"
 input_shape {
   dim: 1
   dim: 512
   dim: 30
   dim: 30
 }
-input: "conv4"
+input: "conv4_3"
 input_shape {
   dim: 1
   dim: 512
   dim: 30
   dim: 30
 }
-input: "conv5"
+input: "conv5_3"
 input_shape {
   dim: 1
   dim: 512
@@ -28,7 +28,7 @@ input_shape {
 layer {
   name: "roi_pool3"
   type: "ROIPooling"
-  bottom: "conv3"
+  bottom: "conv3_3"
   bottom: "rois"
   top: "roi_pool3"
   roi_pooling_param {
@@ -46,7 +46,7 @@ layer {
 layer {
   name: "roi_pool4"
   type: "ROIPooling"
-  bottom: "conv4"
+  bottom: "conv4_3"
   bottom: "rois"
   top: "roi_pool4"
   roi_pooling_param {
@@ -64,7 +64,7 @@ layer {
 layer {
   name: "roi_pool5"
   type: "ROIPooling"
-  bottom: "conv5"
+  bottom: "conv5_3"
   bottom: "rois"
   top: "roi_pool5"
   roi_pooling_param {

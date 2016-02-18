@@ -224,12 +224,13 @@ def _az_forward(net, im, all_boxes, conv = None):
             blobs_out = net['full'].forward(data=blobs['data'].astype(np.float32, copy=False),
                                             rois=blobs['rois'].astype(np.float32, copy=False),
                                             blobs = [conv_name])
-            conv = blobs_out[conv_name]
+            conv = {name: blobs_out[name] for name in conv_name}
         else:
-            net['fc'].blobs['conv'].reshape(*(conv.shape))
+            for name in conv_name:
+                net['fc'].blobs[name].reshape(*(conv[name].shape))
             net['fc'].blobs['rois'].reshape(*(blobs['rois'].shape))
-            blobs_out = net['fc'].forward(conv=conv.astype(np.float32, copy=False),
-                                            rois=blobs['rois'].astype(np.float32, copy=False))
+            blobs_out = net['fc'].forward(rois=blobs['rois'].astype(np.float32, copy=False),
+                                          **(conv))
             
         z_tb = blobs_out['zoom_prob'] 
          

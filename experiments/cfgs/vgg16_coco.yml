@@ -12,4 +12,4 @@ SEAR:
   TRAIN_REP: 4
   Tz: 0.2
   NUM_PROPOSALS: 300
-  LAST_CONV: conv5_3
+  LAST_CONV: [conv5_3]
