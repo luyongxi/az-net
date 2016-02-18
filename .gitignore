@@ -3,3 +3,4 @@
 utils/*.c
 utils/*.so
 *~
+/*.sh
