@@ -1,4 +1,4 @@
-train_net: "models/Pascal/VGG16/az-net/train.prototxt"
+train_net: "models/Pascal/VGG16_skip/az-net/train.prototxt"
 base_lr: 0.001
 lr_policy: "step"
 gamma: 0.1
@@ -11,5 +11,5 @@ weight_decay: 0.0005
 # function
 snapshot: 0
 # We still use the snapshot prefix, though
-snapshot_prefix: "vgg16_az_net"
+snapshot_prefix: "vgg16_az_net_skip"
 #debug_info: true

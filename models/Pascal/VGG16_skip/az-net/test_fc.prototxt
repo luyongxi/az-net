@@ -1,5 +1,19 @@
 name: "VGG_ILSVRC_16_layers"
-input: "conv"
+input: "conv3"
+input_shape {
+  dim: 1
+  dim: 512
+  dim: 30
+  dim: 30
+}
+input: "conv4"
+input_shape {
+  dim: 1
+  dim: 512
+  dim: 30
+  dim: 30
+}
+input: "conv5"
 input_shape {
   dim: 1
   dim: 512
@@ -12,16 +26,113 @@ input_shape {
   dim: 5 # [batch ind, x1, y1, x2, y2] zero-based indexing
 }
 layer {
+  name: "roi_pool3"
+  type: "ROIPooling"
+  bottom: "conv3"
+  bottom: "rois"
+  top: "roi_pool3"
+  roi_pooling_param {
+    pooled_w: 7
+    pooled_h: 7
+    spatial_scale: 0.25 # 1/4
+  }
+}
+layer {
+  name: "roi_norm3"
+  type: "GRN"
+  bottom: "roi_pool3"
+  top: "roi_pool3"
+}
+layer {
+  name: "roi_pool4"
+  type: "ROIPooling"
+  bottom: "conv4"
+  bottom: "rois"
+  top: "roi_pool4"
+  roi_pooling_param {
+    pooled_w: 7
+    pooled_h: 7
+    spatial_scale: 0.125 # 1/8
+  }
+}
+layer {
+  name: "roi_norm4"
+  type: "GRN"
+  bottom: "roi_pool4"
+  top: "roi_pool4"
+}
+layer {
   name: "roi_pool5"
   type: "ROIPooling"
-  bottom: "conv"
+  bottom: "conv5"
   bottom: "rois"
-  top: "pool5"
+  top: "roi_pool5"
   roi_pooling_param {
     pooled_w: 7
     pooled_h: 7
     spatial_scale: 0.0625 # 1/16
   }
+}
+layer {
+  name: "roi_norm5"
+  type: "GRN"
+  bottom: "roi_pool5"
+  top: "roi_pool5"
+}
+layer {
+  name: "concat5"
+  type: "Concat"
+  bottom: "roi_pool3" 
+  bottom: "roi_pool4"
+  bottom: "roi_pool5"
+  top: "cat5"
+  concat_param {
+    axis: 1 # along channels
+  }
+}
+layer {
+  name: "scale5"
+  type: "Power"
+  bottom: "cat5"
+  top: "cat5"
+  power_param {
+    power: 1
+    scale: 1000
+    shift: 0
+  }
+}
+layer {
+  name: "conv_pool5"
+  type: "Convolution"
+  bottom: "cat5"
+  top: "pool5"
+  param {
+    lr_mult: 1
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 2
+    decay_mult: 0
+  }
+  convolution_param {
+    num_output: 512
+    kernel_size: 1
+    stride: 1
+    weight_filler {
+      type: "gaussian"
+      std: 0.001
+    }
+    bias_filler {
+      type: "constant"
+      value: 0
+    }
+  }
+}
+layer {
+  name: "relu_pool"
+  type: "ReLU"
+  bottom: "pool5"
+  top: "pool5"
 }
 layer {
   name: "int6"
