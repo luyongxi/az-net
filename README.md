@@ -8,12 +8,15 @@ Created by Yongxi Lu at University of California, San Diego.
 
 If you find this useful, please consider citing
 
+
+  ```
   @article{lu2015adaptive,
       title={Adaptive Object Detection Using Adjacency and Zoom Prediction},
       author={Lu, Yongxi and Javidi, Tara and Lazebnik, Svetlana},
       journal={arXiv preprint arXiv:1512.07711},
       year={2015}
     }
+ ```
 
 ## Installation
 
@@ -62,4 +65,8 @@ To install, use the following steps:
     
     See `data/README.md` for details.
 
-6. To train and test models, use scripts in $ROOT/experiments/scripts
+6. To train and test models, use scripts in 
+  
+    ```
+    $ROOT/experiments/scripts
+    ```
