@@ -49,6 +49,9 @@ def parse_args():
     parser.add_argument('--rand', dest='randomize',
                         help='randomize (do not use a fixed seed)',
                         action='store_true')
+    parser.add_argument('--norm', dest='normalize',
+                        help='to un-normalize (use when pre-trained model is normalized)',
+                        action='store_true')
 
     if len(sys.argv) == 1:
         parser.print_help()
@@ -73,6 +76,11 @@ if __name__ == '__main__':
         # fix the random seeds (numpy and caffe) for reproducibility
         np.random.seed(cfg.RNG_SEED)
         caffe.set_random_seed(cfg.RNG_SEED)
+    
+    if args.normalize:
+        cfg.TRAIN.UN_NORMALIZE = True
+    else:
+        cfg.TRAIN.UN_NORMALIZE = False
 
     # set up caffe
     caffe.set_mode_gpu()

@@ -49,14 +49,17 @@ def parse_args():
     parser.add_argument('--rand', dest='randomize',
                         help='randomize (do not use a fixed seed)',
                         action='store_true')
+    parser.add_argument('--norm', dest='normalize',
+                        help='to un-normalize (use when pre-trained model is normalized)',
+                        action='store_true')
     parser.add_argument('--def', dest='prototxt',
-                        help='prototxt file defining the SC-Net network',
+                        help='prototxt file defining the AZ-Net network',
                         default=None, type=str)
     parser.add_argument('--def_fc', dest='prototxt_fc',
-                        help='prototxt file defining the fully-connected layers of SC-Net network',
+                        help='prototxt file defining the fully-connected layers of AZ-Net network',
                         default=None, type=str)
     parser.add_argument('--net', dest='caffemodel',
-                        help='SC-Net model to test',
+                        help='AZ-Net model to test',
                         default=None, type=str)
 
     if len(sys.argv) == 1:
@@ -82,6 +85,11 @@ if __name__ == '__main__':
         # fix the random seeds (numpy and caffe) for reproducibility
         np.random.seed(cfg.RNG_SEED)
         caffe.set_random_seed(cfg.RNG_SEED)
+        
+    if args.normalize:
+        cfg.TRAIN.UN_NORMALIZE = True
+    else:
+        cfg.TRAIN.UN_NORMALIZE = False
 
     # set up caffe
     caffe.set_mode_gpu()

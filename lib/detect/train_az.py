@@ -51,11 +51,14 @@ class SolverWrapper(object):
         self.solver.net.layers[0].set_roidb(imdb.roidb)
         
         # re-initialize bounding-box regression layers
-#        net = self.solver.net
-#        net.params['adj_bbox'][0].data[...] = \
-#            npr.normal(0, 0.001, net.params['adj_bbox'][0].data.shape)
-#        net.params['adj_bbox'][1].data[...] = \
-#            np.zeros((net.params['adj_bbox'][1].data.shape))
+        if cfg.TRAIN.UN_NORMALIZE:
+            net = self.solver.net
+            net.params['adj_bbox'][0].data[...] = \
+                    (net.params['adj_bbox'][0].data /
+                     (self.bbox_stds[:, np.newaxis] + cfg.EPS))
+            net.params['adj_bbox'][1].data[...] = \
+                    ((net.params['adj_bbox'][1].data - self.bbox_means)
+                     / (self.bbox_stds + cfg.EPS))
 
     def snapshot(self):
         """Take a snapshot of the network after unnormalizing the learned

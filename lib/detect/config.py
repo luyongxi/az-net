@@ -77,9 +77,6 @@ __C.TRAIN.BBOX_THRESH = 0.5
 # Iterations between snapshots
 __C.TRAIN.SNAPSHOT_ITERS = 10000
 
-# Re-normalize weights for training on top of a fine-tuned network
-__C.TRAIN.RENORMALIZE = False
-
 # Use caching region proposals or not
 __C.TRAIN.USE_CACHE = False
 
@@ -96,6 +93,9 @@ __C.TRAIN.ADDREGIONS =[[0, 0, 1, 1],
                       [0, 0.2, 0.8, 1],
                       [0.2, 0, 1, 0.8],
                       [0.2, 0.2, 1, 1]]
+
+# un-normalize
+__C.TRAIN.UN_NORMALIZE = False
 
 #
 # Testing options
