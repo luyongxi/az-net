@@ -77,7 +77,7 @@ def prepare_roidb(imdb, net):
         max_classes = gt_overlaps.argmax(axis=1)
         roidb[i]['gt_labels'] = max_classes[gt_inds]
 
-        # use trained SC-Net to generate region proposals
+        # use trained AZ-Net to generate region proposals
         if use_loaded:
             ex_rois = np.vstack((prop[i], gt_rois))
         else:
