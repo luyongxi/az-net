@@ -2,7 +2,7 @@ name: "VGG_ILSVRC_16_layers"
 input: "conv3_3"
 input_shape {
   dim: 1
-  dim: 512
+  dim: 256
   dim: 30
   dim: 30
 }
@@ -38,12 +38,6 @@ layer {
   }
 }
 layer {
-  name: "roi_norm3"
-  type: "GRN"
-  bottom: "roi_pool3"
-  top: "roi_pool3"
-}
-layer {
   name: "roi_pool4"
   type: "ROIPooling"
   bottom: "conv4_3"
@@ -54,12 +48,6 @@ layer {
     pooled_h: 7
     spatial_scale: 0.125 # 1/8
   }
-}
-layer {
-  name: "roi_norm4"
-  type: "GRN"
-  bottom: "roi_pool4"
-  top: "roi_pool4"
 }
 layer {
   name: "roi_pool5"
@@ -74,38 +62,10 @@ layer {
   }
 }
 layer {
-  name: "roi_norm5"
-  type: "GRN"
-  bottom: "roi_pool5"
-  top: "roi_pool5"
-}
-layer {
-  name: "concat5"
-  type: "Concat"
-  bottom: "roi_pool3" 
-  bottom: "roi_pool4"
-  bottom: "roi_pool5"
-  top: "cat5"
-  concat_param {
-    axis: 1 # along channels
-  }
-}
-layer {
-  name: "scale5"
-  type: "Power"
-  bottom: "cat5"
-  top: "cat5"
-  power_param {
-    power: 1
-    scale: 1000
-    shift: 0
-  }
-}
-layer {
-  name: "conv_pool5"
-  type: "Convolution"
-  bottom: "cat5"
-  top: "pool5"
+  name: "top6_1"
+  type: "InnerProduct"
+  bottom: "roi_pool3"
+  top: "top6_1"
   param {
     lr_mult: 1
     decay_mult: 1
@@ -114,13 +74,11 @@ layer {
     lr_mult: 2
     decay_mult: 0
   }
-  convolution_param {
-    num_output: 512
-    kernel_size: 1
-    stride: 1
+  inner_product_param {
+    num_output: 1024
     weight_filler {
       type: "gaussian"
-      std: 0.001
+      std: 0.0001
     }
     bias_filler {
       type: "constant"
@@ -129,48 +87,116 @@ layer {
   }
 }
 layer {
-  name: "relu_pool"
+  name: "relu6_1"
   type: "ReLU"
-  bottom: "pool5"
-  top: "pool5"
+  bottom: "top6_1"
+  top: "top6_1"
 }
 layer {
-  name: "fc6"
-  type: "InnerProduct"
-  bottom: "pool5"
-  top: "fc6"
-  param {
-    lr_mult: 1
-    decay_mult: 1
-  }
-  param {
-    lr_mult: 2
-    decay_mult: 0
-  }
-  inner_product_param {
-    num_output: 4096
-  }
-}
-layer {
-  name: "relu6"
-  type: "ReLU"
-  bottom: "fc6"
-  top: "fc6"
-}
-layer {
-  name: "drop6"
+  name: "drop6_1"
   type: "Dropout"
-  bottom: "fc6"
-  top: "fc6"
+  bottom: "top6_1"
+  top: "top6_1"
   dropout_param {
     dropout_ratio: 0.5
   }
 }
 layer {
-  name: "fc7"
+  name: "top6_2"
   type: "InnerProduct"
-  bottom: "fc6"
-  top: "fc7"
+  bottom: "roi_pool4"
+  top: "top6_2"
+  param {
+    lr_mult: 1
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 2
+    decay_mult: 0
+  }
+  inner_product_param {
+    num_output: 1024
+    weight_filler {
+      type: "gaussian"
+      std: 0.0001
+    }
+    bias_filler {
+      type: "constant"
+      value: 0
+    }
+  }
+}
+layer {
+  name: "relu6_2"
+  type: "ReLU"
+  bottom: "top6_2"
+  top: "top6_2"
+}
+layer {
+  name: "drop6_2"
+  type: "Dropout"
+  bottom: "top6_2"
+  top: "top6_2"
+  dropout_param {
+    dropout_ratio: 0.5
+  }
+}
+layer {
+  name: "top6_3"
+  type: "InnerProduct"
+  bottom: "roi_pool5"
+  top: "top6_3"
+  param {
+    lr_mult: 1
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 2
+    decay_mult: 0
+  }
+  inner_product_param {
+    num_output: 1024
+    weight_filler {
+      type: "gaussian"
+      std: 0.0001
+    }
+    bias_filler {
+      type: "constant"
+      value: 0
+    }
+  }
+}
+layer {
+  name: "relu6_3"
+  type: "ReLU"
+  bottom: "top6_3"
+  top: "top6_3"
+}
+layer {
+  name: "drop6_3"
+  type: "Dropout"
+  bottom: "top6_3"
+  top: "top6_3"
+  dropout_param {
+    dropout_ratio: 0.5
+  }
+}
+layer {
+  name: "concat6"
+  type: "Concat"
+  bottom: "top6_1" 
+  bottom: "top6_2"
+  bottom: "top6_3"
+  top: "top6"
+  concat_param {
+    axis: 1 # along channels
+  }
+}
+layer {
+  name: "top7"
+  type: "InnerProduct"
+  bottom: "top6"
+  top: "top7"
   param {
     lr_mult: 1
     decay_mult: 1
@@ -181,19 +207,27 @@ layer {
   }
   inner_product_param {
     num_output: 4096
+    weight_filler {
+      type: "gaussian"
+      std: 0.0001
+    }
+    bias_filler {
+      type: "constant"
+      value: 0
+    }
   }
 }
 layer {
   name: "relu7"
   type: "ReLU"
-  bottom: "fc7"
-  top: "fc7"
+  bottom: "top7"
+  top: "top7"
 }
 layer {
   name: "drop7"
   type: "Dropout"
-  bottom: "fc7"
-  top: "fc7"
+  bottom: "top7"
+  top: "top7"
   dropout_param {
     dropout_ratio: 0.5
   }
@@ -201,7 +235,7 @@ layer {
 layer {
   name: "cls_score"
   type: "InnerProduct"
-  bottom: "fc7"
+  bottom: "top7"
   top: "cls_score"
   param {
     lr_mult: 1
@@ -226,7 +260,7 @@ layer {
 layer {
   name: "bbox_pred"
   type: "InnerProduct"
-  bottom: "fc7"
+  bottom: "top7"
   top: "bbox_pred"
   param {
     lr_mult: 1

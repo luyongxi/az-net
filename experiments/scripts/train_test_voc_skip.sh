@@ -25,6 +25,7 @@ time ./tools/train_az_net.py --gpu $1 \
   --weights output/az-net/voc_$2/vgg16_az_net_skip_frozen_iter_40000.caffemodel \
   --imdb voc_$2 \
   --cfg experiments/cfgs/vgg16_voc$2_skip.yml \
+  --norm \
   --iters 100000
 
 # frcnn: freeze conv1-conv5
@@ -47,6 +48,7 @@ time ./tools/train_det_net.py --gpu $1 \
   --net output/az-net/voc_$2/vgg16_az_net_skip_finetune_iter_100000.caffemodel \
   --imdb voc_$2 \
   --cfg experiments/cfgs/vgg16_voc$2_skip.yml \
+  --norm \
   --iters 100000
 
 # az-net: shared conv layers
@@ -66,6 +68,7 @@ time ./tools/train_det_net.py --gpu $1 \
   --net output/az-net/voc_$2/vgg16_az_net_skip_shared_iter_40000.caffemodel \
   --imdb voc_$2 \
   --cfg experiments/cfgs/vgg16_voc$2_skip.yml \
+  --norm \
   --iters 40000
 
 # testing with layer sharing

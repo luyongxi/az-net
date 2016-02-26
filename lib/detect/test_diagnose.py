@@ -223,7 +223,7 @@ def _az_forward(net, im, all_boxes, conv = None):
             net['full'].blobs['rois'].reshape(*(blobs['rois'].shape))
             blobs_out = net['full'].forward(data=blobs['data'].astype(np.float32, copy=False),
                                             rois=blobs['rois'].astype(np.float32, copy=False),
-                                            blobs = [conv_name])
+                                            blobs = conv_name)
             conv = {name: blobs_out[name] for name in conv_name}
         else:
             for name in conv_name:
