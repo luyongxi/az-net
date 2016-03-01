@@ -13,4 +13,5 @@ SEAR:
   APPEND_BOXES: False
   NUM_PROPOSALS: 2000
   BATCH_SIZE: 1000
-  LAST_CONV: [conv5_3]
+  AZ_CONV: [conv5_3]
+  FRCNN_CONV: [conv5_3]

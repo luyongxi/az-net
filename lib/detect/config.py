@@ -180,8 +180,11 @@ __C.SEAR.MIN_SIDE = 10
 # batch size of region processing (to prevent excessive GPU memory consumption)
 __C.SEAR.BATCH_SIZE = 10000
 
-# name of the last convolutional layer (determined by which model is used)
-__C.SEAR.LAST_CONV = ['conv5_3']
+# conv layers for AZ-Net
+__C.SEAR.AZ_CONV = ['conv5_3']
+
+# conv layers for FRCNN
+__C.SEAR.FRCNN_CONV = ['conv5_3']
 
 #
 # MISC

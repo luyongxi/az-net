@@ -190,7 +190,7 @@ def _az_forward(net, im, all_boxes, conv = None):
         To prevent excessive GPU memory consumption, 
         ROI pooling is performed in batches if necessary
     """
-    conv_name = cfg.SEAR.LAST_CONV
+    conv_name = cfg.SEAR.AZ_CONV
     
     batchSize = cfg.SEAR.BATCH_SIZE
     num_batches = int(np.ceil(all_boxes.shape[0] / float(batchSize)))

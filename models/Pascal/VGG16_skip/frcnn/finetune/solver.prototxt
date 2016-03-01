@@ -1,5 +1,5 @@
 train_net: "models/Pascal/VGG16_skip/frcnn/finetune/train.prototxt"
-base_lr: 0.005
+base_lr: 0.001
 clip_gradients: 20
 lr_policy: "step"
 gamma: 0.2
