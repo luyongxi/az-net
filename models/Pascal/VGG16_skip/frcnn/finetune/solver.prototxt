@@ -3,7 +3,7 @@ base_lr: 0.001
 clip_gradients: 20
 lr_policy: "step"
 gamma: 0.2
-stepsize: 30000
+stepsize: 60000
 display: 20
 average_loss: 100
 # iter_size: 1

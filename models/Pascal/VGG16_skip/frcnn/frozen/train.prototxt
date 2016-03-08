@@ -395,17 +395,6 @@ layer {
   }
 }
 layer {
-  name: "shift_3"
-  type: "Power"
-  bottom: "roi_pool3"
-  top: "roi_pool3"
-  power_param {
-    power: 1
-    scale: 1
-    shift: 0.00008
-  }
-}
-layer {
   name: "roi_norm3"
   type: "GRN"
   bottom: "roi_pool3"
@@ -424,17 +413,6 @@ layer {
   }
 }
 layer {
-  name: "shift_4"
-  type: "Power"
-  bottom: "roi_pool4"
-  top: "roi_pool4"
-  power_param {
-    power: 1
-    scale: 1
-    shift: 0.00004
-  }
-}
-layer {
   name: "roi_norm4"
   type: "GRN"
   bottom: "roi_pool4"
@@ -450,17 +428,6 @@ layer {
     pooled_w: 7
     pooled_h: 7
     spatial_scale: 0.0625 # 1/16
-  }
-}
-layer {
-  name: "shift_5"
-  type: "Power"
-  bottom: "roi_pool5"
-  top: "roi_pool5"
-  power_param {
-    power: 1
-    scale: 1
-    shift: 0.00004
   }
 }
 layer {

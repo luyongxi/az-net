@@ -191,7 +191,6 @@ def _az_forward(net, im, all_boxes, conv = None):
         To prevent excessive GPU memory consumption, 
         ROI pooling is performed in batches if necessary
     """
-    conv_name = cfg.SEAR.AZ_CONV
     
     batchSize = cfg.SEAR.BATCH_SIZE
     num_batches = int(np.ceil(all_boxes.shape[0] / float(batchSize)))
@@ -224,15 +223,17 @@ def _az_forward(net, im, all_boxes, conv = None):
             net['full'].blobs['rois'].reshape(*(blobs['rois'].shape))
             blobs_out = net['full'].forward(data=blobs['data'].astype(np.float32, copy=False),
                                             rois=blobs['rois'].astype(np.float32, copy=False),
-                                            blobs = conv_name)
-            conv = {name: blobs_out[name] for name in conv_name}
-        else:            
-            for name in conv_name:
+                                            blobs = cfg.SEAR.FRCNN_CONV)
+            conv = {name: blobs_out[name] for name in cfg.SEAR.FRCNN_CONV}
+        else:
+            in_conv = {}            
+            for name in cfg.SEAR.AZ_CONV:
                 net['fc'].blobs[name].reshape(*(conv[name].shape))
+                in_conv[name] = conv[name]
             
             net['fc'].blobs['rois'].reshape(*(blobs['rois'].shape))
             blobs_out = net['fc'].forward(rois=blobs['rois'].astype(np.float32, copy=False),
-                                          **(conv))
+                                          **(in_conv))
             
         z_tb = blobs_out['zoom_prob']
          
