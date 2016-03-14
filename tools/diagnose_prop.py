@@ -16,7 +16,7 @@
 
 import _init_paths
 from detect.test_diagnose import test_proposals
-from detect.config import cfg, cfg_from_file
+from detect.config import cfg, cfg_from_file, cfg_set_mode
 from datasets.factory import get_imdb
 import caffe
 import argparse
@@ -63,6 +63,8 @@ if __name__ == '__main__':
 
     if args.cfg_file is not None:
         cfg_from_file(args.cfg_file)
+
+    cfg_set_mode('Test')
 
     print('Using config:')
     pprint.pprint(cfg)

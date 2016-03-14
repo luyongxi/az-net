@@ -14,4 +14,4 @@ time ./tools/diagnose_prop.py --gpu $1 \
   --def_fc models/Pascal/VGG16/az-net/test_fc.prototxt \
   --net output/az-net/voc_2007_trainval/vgg16_az_net_iter_80000.caffemodel \
   --imdb voc_2007_test \
-  --cfg experiments/cfgs/vgg16_voc2007_diag.yml
+  --cfg experiments/cfgs/exp1.yml

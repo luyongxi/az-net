@@ -15,7 +15,7 @@
 
 import _init_paths
 from detect.train_az import get_training_roidb, train_net
-from detect.config import cfg, cfg_from_file, get_output_dir
+from detect.config import cfg, cfg_from_file, get_output_dir, cfg_set_mode
 from datasets.factory import get_imdb
 import caffe
 import argparse
@@ -68,6 +68,8 @@ if __name__ == '__main__':
 
     if args.cfg_file is not None:
         cfg_from_file(args.cfg_file)
+
+    cfg_set_mode('Train')
 
     print('Using config:')
     pprint.pprint(cfg)

@@ -20,7 +20,7 @@ set -e
 
 export PYTHONUNBUFFERED="True"
 
-LOG="experiments/logs/train_test_unshared_voc.txt.`date +'%Y-%m-%d_%H-%M-%S'`"
+LOG="experiments/logs/voc_unshared.txt.`date +'%Y-%m-%d_%H-%M-%S'`"
 exec &> >(tee -a "$LOG")
 echo Using cfg file "$cfg_file"
 echo Training set "$trainset", test set "$testset"

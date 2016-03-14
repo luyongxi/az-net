@@ -97,6 +97,12 @@ __C.TRAIN.ADDREGIONS =[[0, 0, 1, 1],
 # un-normalize
 __C.TRAIN.UN_NORMALIZE = False
 
+# threshold for zoom
+__C.TRAIN.Tz = 0.0
+
+# number of proposals in training
+__C.TRAIN.NUM_PROPOSALS  = 2000
+
 #
 # Testing options
 #
@@ -122,6 +128,12 @@ __C.TEST.BBOX_REG = True
 
 # whether to display results or not
 __C.TEST.DISPLAY = False
+
+# threshold for zoom
+__C.TEST.Tz = 0.1
+
+# number of proposals in training
+__C.TEST.NUM_PROPOSALS  = 300
 
 #
 # Options that controls the AZ-Net search process
@@ -158,12 +170,10 @@ __C.SEAR.EMB_REG_THRESH = 0.25
 # Scaled prediction confidence score according to region overlapping
 __C.SEAR.SCALE_ADJ_CONF = False
 
-# threshold for zoom
-__C.SEAR.Tz = 0.1
 # threshold in confidence score
 __C.SEAR.Tc = 0.005
 __C.SEAR.FIXED_PROPOSAL_NUM = True
-__C.SEAR.NUM_PROPOSALS  = 300
+
 # Append boxes around proposals
 __C.SEAR.APPEND_BOXES = False
 __C.SEAR.APPEND_TEMP = np.transpose(np.array([[[0,0,1,1],
@@ -263,3 +273,12 @@ def cfg_from_file(filename):
         yaml_cfg = edict(yaml.load(f))
 
     _merge_a_into_b(yaml_cfg, __C)
+
+def cfg_set_mode(mode):
+    """Set train or test mode."""
+    if mode == 'Train':
+        __C.SEAR.Tz = __C.TRAIN.Tz
+        __C.NUM_PROPOSALS = __C.TRAIN.NUM_PROPOSALS
+    elif mode == 'Test':
+        __C.SEAR.Tz = __C.TEST.Tz
+        __C.NUM_PROPOSALS = __C.TEST.NUM_PROPOSALS

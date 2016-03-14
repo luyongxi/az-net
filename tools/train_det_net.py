@@ -15,7 +15,7 @@
 
 import _init_paths
 from detect.train_det import get_training_roidb, train_net
-from detect.config import cfg, cfg_from_file, get_output_dir
+from detect.config import cfg, cfg_from_file, get_output_dir, cfg_set_mode
 from datasets.factory import get_imdb
 import caffe
 import argparse
@@ -78,6 +78,8 @@ if __name__ == '__main__':
     if args.cfg_file is not None:
         cfg_from_file(args.cfg_file)
 
+    cfg_set_mode('Train')
+
     print('Using config:')
     pprint.pprint(cfg)
 
@@ -97,7 +99,7 @@ if __name__ == '__main__':
         caffe.set_device(args.gpu_id)
         
         # set up test net, if provided
-    # full SC-net
+    # full AZ-net
     nets = None
     if args.caffemodel is not None:
         net = caffe.Net(args.prototxt, args.caffemodel, caffe.TEST)
