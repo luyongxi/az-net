@@ -1,0 +1,22 @@
+# Model: VGG 16
+# Training: COCO 2014 Trainval
+# Testing: COCO 2015 Test-dev/Test
+# Skip: No
+# GPU: GTX 980 Ti
+EXP_DIR: az-net
+TRAIN:
+  IMS_PER_BATCH: 1
+  BATCH_SIZE: 256
+  MAX_SIZE: 800
+  USE_FLIPPED: True
+  SNAPSHOT_ITERS: 240000
+  Tz: 0.0
+  NUM_PROPOSALS: 2000
+TEST:
+  MAX_SIZE: 800
+  NUM_PROPOSALS: 300
+  Tz: 0.2
+SEAR:
+  TRAIN_REP: 4
+  AZ_CONV: [conv5_3]
+  FRCNN_CONV: [conv5_3]

@@ -1,0 +1,24 @@
+# Model: VGG 16
+# Training: VOC 2007 Trainval
+# Testing: VOC 2007 Test
+# Skip: Yes
+# GPU: GTX 980Ti
+
+EXP_DIR: az-net
+TRAIN:
+  IMS_PER_BATCH: 1
+  BATCH_SIZE: 128
+  MAX_SIZE: 800
+  SNAPSHOT_ITERS: 80000
+  NUM_PROPOSALS: 2000
+  Tz: 0.0
+TEST:
+  MAX_SIZE: 800
+  NUM_PROPOSALS: 300
+  Tz: 0.01
+SEAR:
+  FIXED_PROPOSAL_NUM: True
+  BATCH_SIZE: 1000
+  AZ_CONV: [conv5_3]
+  FRCNN_CONV: [conv3_3, conv4_3, conv5_3]
+DEDUP_BOXES: 0.5 # conv3_3
