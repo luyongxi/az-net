@@ -285,10 +285,8 @@ def im_propose(net, im):
     conv = None
     for k in xrange(K):
         # Get zoom indicator and adjacent predictions (w/ confidence)
-        # Scores and aBBox already sifted and vectorized by sc_net function
+        # Scores and aBBox already sifted and vectorized by az_net function
 #        print B.shape[0]
-        # anchor region history
-        Bhis = np.vstack((Bhis, np.hstack((B, k * np.ones((B.shape[0],1))))))
         zoom, boxes, c, conv = _az_forward(net, im, B, conv)
         num_eval = num_eval + B.shape[0]
         # predictions with high confidence scores are included
@@ -299,6 +297,8 @@ def im_propose(net, im):
         Z = B[indZ, :]
         if Z.shape[0] == 0:
             break
+        # anchor region history
+        Bhis = np.vstack((Bhis, np.hstack((B, zoom[:, np.newaxis]))))
         # B is updated to be regions that are expanded from it
         B = divide_region(Z)
         
@@ -349,7 +349,7 @@ def test_proposals(net, imdb):
         _t['im_prop'].toc()
     
         gt_boxes[i] = gt_roidb[i]['boxes']
-        fn[i] = imdb.image_path_at(i)
+        fn[i] = os.path.basename(imdb.image_path_at(i))
         
         gt_overlaps = roidb[i]['gt_overlaps'].toarray()        
         # max overlap with gt over classes (columns)

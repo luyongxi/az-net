@@ -278,7 +278,7 @@ def cfg_set_mode(mode):
     """Set train or test mode."""
     if mode == 'Train':
         __C.SEAR.Tz = __C.TRAIN.Tz
-        __C.NUM_PROPOSALS = __C.TRAIN.NUM_PROPOSALS
+        __C.SEAR.NUM_PROPOSALS = __C.TRAIN.NUM_PROPOSALS
     elif mode == 'Test':
         __C.SEAR.Tz = __C.TEST.Tz
-        __C.NUM_PROPOSALS = __C.TEST.NUM_PROPOSALS
+        __C.SEAR.NUM_PROPOSALS = __C.TEST.NUM_PROPOSALS

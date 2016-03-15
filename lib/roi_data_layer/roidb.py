@@ -59,9 +59,9 @@ def prepare_roidb(imdb, net):
             im_width = im_size[1]
             index = i - num_images
             roidb[i]['ex_boxes'] = _flip_boxes(roidb[index]['ex_boxes'], im_width)\
-                                        .astype(np.uint16, copy=False)
+                                        .astype(np.float32, copy=False)
             roidb[i]['gt_boxes'] = _flip_boxes(roidb[index]['gt_boxes'], im_width)\
-                                        .astype(np.uint16, copy=False)
+                                        .astype(np.float32, copy=False)
             roidb[i]['gt_labels']  = roidb[index]['gt_labels']
                         
             continue

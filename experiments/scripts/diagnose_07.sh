@@ -12,6 +12,6 @@ echo Logging output to "$LOG"
 time ./tools/diagnose_prop.py --gpu $1 \
   --def models/Pascal/VGG16/az-net/test.prototxt \
   --def_fc models/Pascal/VGG16/az-net/test_fc.prototxt \
-  --net output/az-net/voc_2007_trainval/vgg16_az_net_iter_80000.caffemodel \
+  --net output/az-net/voc_2007_trainval/vgg16_az_net_iter_160000.caffemodel \
   --imdb voc_2007_test \
   --cfg experiments/cfgs/exp1.yml
