@@ -11,11 +11,11 @@
 # Written by Ross Girshick
 # --------------------------------------------------------
 
-"""Generate detections on saved proposals for a given imdb."""
+"""Set threshold for zoom indicators"""
 
 import _init_paths
-from detect.test import test_net
-from detect.config import cfg, cfg_from_file, cfg_set_path
+from detect.tune import tune_thresh
+from detect.config import cfg, cfg_from_file, cfg_set_mode, cfg_set_path
 from datasets.factory import get_imdb
 import caffe
 import argparse
@@ -26,18 +26,18 @@ def parse_args():
     """
     Parse input arguments
     """
-    parser = argparse.ArgumentParser(description='Use Fast-RCNN for object detection')
+    parser = argparse.ArgumentParser(description='Use AZ-Net to generate proposals')
     parser.add_argument('--gpu', dest='gpu_id', help='GPU id to use',
                         default=0, type=int)
     parser.add_argument('--def', dest='prototxt',
-                        help='prototxt file defining the classifier network',
+                        help='prototxt file defining the AZ-Net',
+                        default=None, type=str)
+    parser.add_argument('--def_fc', dest='prototxt_fc',
+                        help='prototxt file defining the fully-connected layers of AZ-Net',
                         default=None, type=str)
     parser.add_argument('--net', dest='caffemodel',
-                        help='classifier model to test',
-                        default=None, type=str)
-    parser.add_argument('--prop', dest='prop',
-                        help='file saving object proposals',
-                        default=None, type=str)
+                        help='AZ-Net model to test',
+                        default=None, type=str)                     
     parser.add_argument('--cfg', dest='cfg_file',
                         help='optional config file', default=None, type=str)
     parser.add_argument('--wait', dest='wait',
@@ -45,9 +45,7 @@ def parse_args():
                         default=True, type=bool)
     parser.add_argument('--imdb', dest='imdb_name',
                         help='dataset to test',
-                        default='voc_2007_test', type=str)
-    parser.add_argument('--comp', dest='comp_mode', help='competition mode',
-                        action='store_true')
+                        default='voc_2007_trainval', type=str)
     parser.add_argument('--exp', dest='exp_dir',
                         help='experiment path',
                         default='None', type=str)
@@ -70,6 +68,8 @@ if __name__ == '__main__':
 
     cfg_set_path(args.exp_dir)
 
+    cfg_set_mode('Train')
+
     print('Using config:')
     pprint.pprint(cfg)
 
@@ -80,12 +80,15 @@ if __name__ == '__main__':
     caffe.set_mode_gpu()
     caffe.set_device(args.gpu_id)
     
-    # classifier net
+    # full AZ-net
     net = caffe.Net(args.prototxt, args.caffemodel, caffe.TEST)
     net.name = os.path.splitext(os.path.basename(args.caffemodel))[0]
-    nets = {'full': net}
+    # fc layers of AZ-Net
+    net_fc = caffe.Net(args.prototxt_fc, args.caffemodel, caffe.TEST)
+    net_fc.name = os.path.splitext(os.path.basename(args.caffemodel))[0]
+    
+    nets = {'full':net, 'fc': net_fc}
     
     imdb = get_imdb(args.imdb_name)
-    imdb.competition_mode(args.comp_mode)
 
-    test_net(nets, args.prop, imdb)
+    tune_thresh(nets, imdb)

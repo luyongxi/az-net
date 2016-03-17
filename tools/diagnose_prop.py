@@ -15,8 +15,8 @@
    (diagnostic mode)."""
 
 import _init_paths
-from detect.test_diagnose import test_proposals
-from detect.config import cfg, cfg_from_file, cfg_set_mode
+from detect.tune import test_proposals
+from detect.config import cfg, cfg_from_file, cfg_set_mode, cfg_load_thresh, cfg_set_path
 from datasets.factory import get_imdb
 import caffe
 import argparse
@@ -37,7 +37,7 @@ def parse_args():
                         help='prototxt file defining the fully-connected layers of AZ-Net',
                         default=None, type=str)
     parser.add_argument('--net', dest='caffemodel',
-                        help='SC-Net model to test',
+                        help='AZ-Net model to test',
                         default=None, type=str)                     
     parser.add_argument('--cfg', dest='cfg_file',
                         help='optional config file', default=None, type=str)
@@ -47,6 +47,12 @@ def parse_args():
     parser.add_argument('--imdb', dest='imdb_name',
                         help='dataset to test',
                         default='voc_2007_test', type=str)
+    parser.add_argument('--thresh', dest='thresh_file',
+                        help='file that stores zoom threshold',
+                        default=None, type=str)
+    parser.add_argument('--exp', dest='exp_dir',
+                        help='experiment path',
+                        default='None', type=str)
 
     if len(sys.argv) == 1:
         parser.print_help()
@@ -64,7 +70,14 @@ if __name__ == '__main__':
     if args.cfg_file is not None:
         cfg_from_file(args.cfg_file)
 
-    cfg_set_mode('Test')
+    cfg_set_path(args.exp_dir)
+
+    while not os.path.exists(args.thresh_file) and args.wait:
+       print('Wating for {} to exist...'.format(args.thresh_file))
+       time.sleep(10)
+
+    thresh = cfg_load_thresh(args.thresh_file)   
+    cfg_set_mode('Test', thresh)
 
     print('Using config:')
     pprint.pprint(cfg)

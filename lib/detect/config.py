@@ -23,6 +23,7 @@ Most tools in $ROOT/tools take a --cfg option to specify an override file.
 import os
 import os.path as osp
 import numpy as np
+import cPickle
 # `pip install easydict` if you don't have it
 from easydict import EasyDict as edict
 
@@ -97,11 +98,10 @@ __C.TRAIN.ADDREGIONS =[[0, 0, 1, 1],
 # un-normalize
 __C.TRAIN.UN_NORMALIZE = False
 
-# threshold for zoom
-__C.TRAIN.Tz = 0.0
-
 # number of proposals in training
 __C.TRAIN.NUM_PROPOSALS  = 2000
+# anchors per image used in training
+__C.TRAIN.ANCHORS_PER_IMG = 20
 
 #
 # Testing options
@@ -117,7 +117,7 @@ __C.TEST.MAX_SIZE = 1000
 
 # Overlap threshold used for non-maximum suppression (suppress boxes with
 # IoU >= this threshold)
-__C.TEST.NMS = 0.4
+__C.TEST.NMS = 0.5
 
 # Experimental: treat the (K+1) units in the cls_score layer as linear
 # predictors (trained, eg, with one-vs-rest SVMs).
@@ -128,9 +128,6 @@ __C.TEST.BBOX_REG = True
 
 # whether to display results or not
 __C.TEST.DISPLAY = False
-
-# threshold for zoom
-__C.TEST.Tz = 0.1
 
 # number of proposals in training
 __C.TEST.NUM_PROPOSALS  = 300
@@ -171,8 +168,9 @@ __C.SEAR.EMB_REG_THRESH = 0.25
 __C.SEAR.SCALE_ADJ_CONF = False
 
 # threshold in confidence score
-__C.SEAR.Tc = 0.005
+__C.SEAR.Tc = 0.05
 __C.SEAR.FIXED_PROPOSAL_NUM = True
+
 
 # Append boxes around proposals
 __C.SEAR.APPEND_BOXES = False
@@ -219,9 +217,6 @@ __C.EPS = 1e-14
 
 # Root directory of project
 __C.ROOT_DIR = osp.abspath(osp.join(osp.dirname(__file__), '..', '..'))
-
-# Place outputs under an experiments directory
-__C.EXP_DIR = 'default'
 
 def get_output_dir(imdb, net):
     """Return the directory where experimental artifacts are placed.
@@ -274,11 +269,28 @@ def cfg_from_file(filename):
 
     _merge_a_into_b(yaml_cfg, __C)
 
-def cfg_set_mode(mode):
+def cfg_set_mode(mode, thresh=None):
     """Set train or test mode."""
     if mode == 'Train':
-        __C.SEAR.Tz = __C.TRAIN.Tz
+	__C.SEAR.Tz = 0.0
         __C.SEAR.NUM_PROPOSALS = __C.TRAIN.NUM_PROPOSALS
     elif mode == 'Test':
-        __C.SEAR.Tz = __C.TEST.Tz
-        __C.SEAR.NUM_PROPOSALS = __C.TEST.NUM_PROPOSALS
+        assert (thresh is not None), 'testing Tz is not set!'
+	__C.SEAR.Tz = thresh
+	__C.SEAR.NUM_PROPOSALS = __C.TEST.NUM_PROPOSALS
+
+def cfg_load_thresh(filename):
+    """Load threshold from file
+    """
+    with open(filename, 'rb') as f:
+        thresh = cPickle.load(f)
+    return thresh
+
+def cfg_set_path(exp_dir):
+    """Set experiment paths
+    """
+    if exp_dir is None:
+        __C.EXP_DIR = 'default'
+    else:
+        __C.EXP_DIR = exp_dir
+
