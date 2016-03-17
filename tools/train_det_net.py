@@ -15,7 +15,7 @@
 
 import _init_paths
 from detect.train_det import get_training_roidb, train_net
-from detect.config import cfg, cfg_from_file, get_output_dir, cfg_set_mode
+from detect.config import cfg, cfg_from_file, get_output_dir, cfg_set_mode, cfg_set_path
 from datasets.factory import get_imdb
 import caffe
 import argparse
@@ -61,6 +61,9 @@ def parse_args():
     parser.add_argument('--net', dest='caffemodel',
                         help='AZ-Net model to test',
                         default=None, type=str)
+    parser.add_argument('--exp', dest='exp_dir',
+                        help='experiment path',
+                        default='None', type=str)
 
     if len(sys.argv) == 1:
         parser.print_help()
@@ -77,6 +80,8 @@ if __name__ == '__main__':
 
     if args.cfg_file is not None:
         cfg_from_file(args.cfg_file)
+
+    cfg_set_path(args.exp_dir)
 
     cfg_set_mode('Train')
 
