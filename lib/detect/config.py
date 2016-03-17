@@ -23,6 +23,7 @@ Most tools in $ROOT/tools take a --cfg option to specify an override file.
 import os
 import os.path as osp
 import numpy as np
+import cPickle
 # `pip install easydict` if you don't have it
 from easydict import EasyDict as edict
 
@@ -77,9 +78,6 @@ __C.TRAIN.BBOX_THRESH = 0.5
 # Iterations between snapshots
 __C.TRAIN.SNAPSHOT_ITERS = 10000
 
-# Re-normalize weights for training on top of a fine-tuned network
-__C.TRAIN.RENORMALIZE = False
-
 # Use caching region proposals or not
 __C.TRAIN.USE_CACHE = False
 
@@ -97,6 +95,14 @@ __C.TRAIN.ADDREGIONS =[[0, 0, 1, 1],
                       [0.2, 0, 1, 0.8],
                       [0.2, 0.2, 1, 1]]
 
+# un-normalize
+__C.TRAIN.UN_NORMALIZE = False
+
+# number of proposals in training
+__C.TRAIN.NUM_PROPOSALS  = 2000
+# anchors per image used in training
+__C.TRAIN.ANCHORS_PER_IMG = 20
+
 #
 # Testing options
 #
@@ -111,7 +117,7 @@ __C.TEST.MAX_SIZE = 1000
 
 # Overlap threshold used for non-maximum suppression (suppress boxes with
 # IoU >= this threshold)
-__C.TEST.NMS = 0.4
+__C.TEST.NMS = 0.5
 
 # Experimental: treat the (K+1) units in the cls_score layer as linear
 # predictors (trained, eg, with one-vs-rest SVMs).
@@ -122,6 +128,9 @@ __C.TEST.BBOX_REG = True
 
 # whether to display results or not
 __C.TEST.DISPLAY = False
+
+# number of proposals in training
+__C.TEST.NUM_PROPOSALS  = 300
 
 #
 # Options that controls the AZ-Net search process
@@ -158,12 +167,11 @@ __C.SEAR.EMB_REG_THRESH = 0.25
 # Scaled prediction confidence score according to region overlapping
 __C.SEAR.SCALE_ADJ_CONF = False
 
-# threshold for zoom
-__C.SEAR.Tz = 0.1
 # threshold in confidence score
-__C.SEAR.Tc = 0.005
+__C.SEAR.Tc = 0.05
 __C.SEAR.FIXED_PROPOSAL_NUM = True
-__C.SEAR.NUM_PROPOSALS  = 300
+
+
 # Append boxes around proposals
 __C.SEAR.APPEND_BOXES = False
 __C.SEAR.APPEND_TEMP = np.transpose(np.array([[[0,0,1,1],
@@ -180,8 +188,11 @@ __C.SEAR.MIN_SIDE = 10
 # batch size of region processing (to prevent excessive GPU memory consumption)
 __C.SEAR.BATCH_SIZE = 10000
 
-# name of the last convolutional layer (determined by which model is used)
-__C.SEAR.LAST_CONV = 'conv5'
+# conv layers for AZ-Net
+__C.SEAR.AZ_CONV = ['conv5_3']
+
+# conv layers for FRCNN
+__C.SEAR.FRCNN_CONV = ['conv5_3']
 
 #
 # MISC
@@ -206,9 +217,6 @@ __C.EPS = 1e-14
 
 # Root directory of project
 __C.ROOT_DIR = osp.abspath(osp.join(osp.dirname(__file__), '..', '..'))
-
-# Place outputs under an experiments directory
-__C.EXP_DIR = 'default'
 
 def get_output_dir(imdb, net):
     """Return the directory where experimental artifacts are placed.
@@ -260,3 +268,29 @@ def cfg_from_file(filename):
         yaml_cfg = edict(yaml.load(f))
 
     _merge_a_into_b(yaml_cfg, __C)
+
+def cfg_set_mode(mode, thresh=None):
+    """Set train or test mode."""
+    if mode == 'Train':
+	__C.SEAR.Tz = 0.0
+        __C.SEAR.NUM_PROPOSALS = __C.TRAIN.NUM_PROPOSALS
+    elif mode == 'Test':
+        assert (thresh is not None), 'testing Tz is not set!'
+	__C.SEAR.Tz = thresh
+	__C.SEAR.NUM_PROPOSALS = __C.TEST.NUM_PROPOSALS
+
+def cfg_load_thresh(filename):
+    """Load threshold from file
+    """
+    with open(filename, 'rb') as f:
+        thresh = cPickle.load(f)
+    return thresh
+
+def cfg_set_path(exp_dir):
+    """Set experiment paths
+    """
+    if exp_dir is None:
+        __C.EXP_DIR = 'default'
+    else:
+        __C.EXP_DIR = exp_dir
+

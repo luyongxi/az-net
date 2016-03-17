@@ -1,5 +1,5 @@
 name: "VGG_ILSVRC_16_layers"
-input: "conv"
+input: "conv5_3"
 input_shape {
   dim: 1
   dim: 512
@@ -14,7 +14,7 @@ input_shape {
 layer {
   name: "roi_pool5"
   type: "ROIPooling"
-  bottom: "conv"
+  bottom: "conv5_3"
   bottom: "rois"
   top: "pool5"
   roi_pooling_param {

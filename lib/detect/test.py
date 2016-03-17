@@ -9,7 +9,7 @@
 # Written by Ross Girshick
 # --------------------------------------------------------
 
-"""Test using SC-Net on an imdb (image database)."""
+"""Test using AZ-Net on an imdb (image database)."""
 
 from detect.config import cfg, get_output_dir
 from utils.timer import Timer
@@ -191,7 +191,6 @@ def _az_forward(net, im, all_boxes, conv = None):
         To prevent excessive GPU memory consumption, 
         ROI pooling is performed in batches if necessary
     """
-    conv_name = cfg.SEAR.LAST_CONV
     
     batchSize = cfg.SEAR.BATCH_SIZE
     num_batches = int(np.ceil(all_boxes.shape[0] / float(batchSize)))
@@ -224,15 +223,19 @@ def _az_forward(net, im, all_boxes, conv = None):
             net['full'].blobs['rois'].reshape(*(blobs['rois'].shape))
             blobs_out = net['full'].forward(data=blobs['data'].astype(np.float32, copy=False),
                                             rois=blobs['rois'].astype(np.float32, copy=False),
-                                            blobs = [conv_name])
-            conv = blobs_out[conv_name]
+                                            blobs = cfg.SEAR.FRCNN_CONV)
+            conv = {name: blobs_out[name] for name in cfg.SEAR.FRCNN_CONV}
         else:
-            net['fc'].blobs['conv'].reshape(*(conv.shape))
-            net['fc'].blobs['rois'].reshape(*(blobs['rois'].shape))
-            blobs_out = net['fc'].forward(conv=conv.astype(np.float32, copy=False),
-                                            rois=blobs['rois'].astype(np.float32, copy=False))
+            in_conv = {}            
+            for name in cfg.SEAR.AZ_CONV:
+                net['fc'].blobs[name].reshape(*(conv[name].shape))
+                in_conv[name] = conv[name]
             
-        z_tb = blobs_out['zoom_prob'] 
+            net['fc'].blobs['rois'].reshape(*(blobs['rois'].shape))
+            blobs_out = net['fc'].forward(rois=blobs['rois'].astype(np.float32, copy=False),
+                                          **(in_conv))
+            
+        z_tb = blobs_out['zoom_prob']
          
         # adjacent predictions  
         pred_scores = blobs_out['adj_prob']
@@ -258,7 +261,7 @@ def _frcnn_forward(net, im, all_boxes, num_classes, conv = None):
         To prevent excessive GPU memory consumption, 
         ROI pooling is performed in batches if necessary
     """
-    conv_name = cfg.SEAR.LAST_CONV
+    conv_name = cfg.SEAR.FRCNN_CONV
     
     batchSize = cfg.SEAR.BATCH_SIZE
     num_batches = int(np.ceil(all_boxes.shape[0] / float(batchSize)))
@@ -290,13 +293,14 @@ def _frcnn_forward(net, im, all_boxes, num_classes, conv = None):
             net['full'].blobs['rois'].reshape(*(blobs['rois'].shape))
             blobs_out = net['full'].forward(data=blobs['data'].astype(np.float32, copy=False),
                                             rois=blobs['rois'].astype(np.float32, copy=False),
-                                            blobs = [conv_name])
-            conv = blobs_out[conv_name]
+                                            blobs = conv_name)
+            conv = {name: blobs_out[name] for name in conv_name}
         else:
-            net['fc'].blobs['conv'].reshape(*(conv.shape))
+            for name in conv_name:
+                net['fc'].blobs[name].reshape(*(conv[name].shape))
             net['fc'].blobs['rois'].reshape(*(blobs['rois'].shape))
-            blobs_out = net['fc'].forward(conv=conv.astype(np.float32, copy=False),
-                                            rois=blobs['rois'].astype(np.float32, copy=False))
+            blobs_out = net['fc'].forward(rois=blobs['rois'].astype(np.float32, copy=False),
+                                          **(conv))
             
         # adjacent predictions  
         pred_scores = blobs_out['cls_prob']

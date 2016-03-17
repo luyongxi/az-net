@@ -1,5 +1,6 @@
-train_net: "models/Pascal/VGG16/frcnn/shared/train.prototxt"
-base_lr: 0.0001
+train_net: "models/Pascal/VGG16/frcnn/train.prototxt"
+base_lr: 0.001
+clip_gradients: 20
 lr_policy: "step"
 gamma: 0.1
 stepsize: 60000
@@ -12,5 +13,5 @@ weight_decay: 0.0005
 # function
 snapshot: 0
 # We still use the snapshot prefix, though
-snapshot_prefix: "vgg16_fast_rcnn_shared"
+snapshot_prefix: "vgg16_fast_rcnn"
 #debug_info: true

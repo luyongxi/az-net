@@ -15,7 +15,7 @@
 
 import _init_paths
 from detect.test import test_net_shared
-from detect.config import cfg, cfg_from_file
+from detect.config import cfg, cfg_from_file, cfg_set_mode, cfg_load_thresh, cfg_set_path
 from datasets.factory import get_imdb
 import caffe
 import argparse
@@ -54,6 +54,12 @@ def parse_args():
                         default='voc_2007_test', type=str)
     parser.add_argument('--comp', dest='comp_mode', help='competition mode',
                         action='store_true')
+    parser.add_argument('--thresh', dest='thresh_file',
+                        help='file that stores zoom threshold',
+                        default=None, type=str)
+    parser.add_argument('--exp', dest='exp_dir',
+                        help='experiment path',
+                        default='None', type=str)
 
     if len(sys.argv) == 1:
         parser.print_help()
@@ -70,6 +76,15 @@ if __name__ == '__main__':
 
     if args.cfg_file is not None:
         cfg_from_file(args.cfg_file)
+
+    cfg_set_path(args.exp_dir)
+
+    while not os.path.exists(args.thresh_file) and args.wait:
+        print('Wating for {} to exist...'.format(args.thresh_file))
+        time.sleep(10)
+
+    thresh = cfg_load_thresh(args.thresh_file)
+    cfg_set_mode('Test', thresh)
 
     print('Using config:')
     pprint.pprint(cfg)

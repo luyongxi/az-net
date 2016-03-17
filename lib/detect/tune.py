@@ -4,7 +4,7 @@
 # Modified from Fast R-CNN
 # --------------------------------------------------------
 
-"""Functions designed for fine-grained analysis of region proposals.
+"""Functions designed for fine-grained and tuning of hyperparameters.
    All functions are designed with the assumption that the input RoIs
    has labels, so can be analyzed in a fine-grained manner. 
 """
@@ -190,7 +190,7 @@ def _az_forward(net, im, all_boxes, conv = None):
         To prevent excessive GPU memory consumption, 
         ROI pooling is performed in batches if necessary
     """
-    conv_name = cfg.SEAR.LAST_CONV
+    conv_name = cfg.SEAR.AZ_CONV
     
     batchSize = cfg.SEAR.BATCH_SIZE
     num_batches = int(np.ceil(all_boxes.shape[0] / float(batchSize)))
@@ -223,13 +223,14 @@ def _az_forward(net, im, all_boxes, conv = None):
             net['full'].blobs['rois'].reshape(*(blobs['rois'].shape))
             blobs_out = net['full'].forward(data=blobs['data'].astype(np.float32, copy=False),
                                             rois=blobs['rois'].astype(np.float32, copy=False),
-                                            blobs = [conv_name])
-            conv = blobs_out[conv_name]
+                                            blobs = conv_name)
+            conv = {name: blobs_out[name] for name in conv_name}
         else:
-            net['fc'].blobs['conv'].reshape(*(conv.shape))
+            for name in conv_name:
+                net['fc'].blobs[name].reshape(*(conv[name].shape))
             net['fc'].blobs['rois'].reshape(*(blobs['rois'].shape))
-            blobs_out = net['fc'].forward(conv=conv.astype(np.float32, copy=False),
-                                            rois=blobs['rois'].astype(np.float32, copy=False))
+            blobs_out = net['fc'].forward(rois=blobs['rois'].astype(np.float32, copy=False),
+                                          **(conv))
             
         z_tb = blobs_out['zoom_prob'] 
          
@@ -284,10 +285,8 @@ def im_propose(net, im):
     conv = None
     for k in xrange(K):
         # Get zoom indicator and adjacent predictions (w/ confidence)
-        # Scores and aBBox already sifted and vectorized by sc_net function
+        # Scores and aBBox already sifted and vectorized by az_net function
 #        print B.shape[0]
-        # anchor region history
-        Bhis = np.vstack((Bhis, np.hstack((B, k * np.ones((B.shape[0],1))))))
         zoom, boxes, c, conv = _az_forward(net, im, B, conv)
         num_eval = num_eval + B.shape[0]
         # predictions with high confidence scores are included
@@ -298,6 +297,8 @@ def im_propose(net, im):
         Z = B[indZ, :]
         if Z.shape[0] == 0:
             break
+        # anchor region history
+        Bhis = np.vstack((Bhis, np.hstack((B, zoom[:, np.newaxis]))))
         # B is updated to be regions that are expanded from it
         B = divide_region(Z)
         
@@ -314,6 +315,56 @@ def im_propose(net, im):
 
     return np.hstack((Y, aScores[indA[:max_num, np.newaxis]])), Bhis
 
+def tune_thresh(net, imdb):
+    """Find an appropriate threhosld for zoom indicators, so that on the average number
+    of anchors generated per image is roughly equal to cfg.SEAR.AVG_NUM_ANCHORS"""
+    num_images = len(imdb.image_index)
+    # keep cfg.SEAR.AVG_NUM_ANCHORS
+    max_per_set = num_images * cfg.TRAIN.ANCHORS_PER_IMG
+    # thresholds and top scores
+    top_scores = []
+    thresh = -np.inf
+    
+    output_dir = get_output_dir(imdb, net['full'])
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+
+    # timers
+    _t = {'im_prop' : Timer()}
+    
+    gt_roidb = imdb.gt_roidb()
+    roidb = imdb.roidb
+
+    for i in xrange(num_images):
+        im = cv2.imread(imdb.image_path_at(i))
+        _t['im_prop'].tic()
+        _, anchor_boxes = \
+            im_propose(net, im) 
+        
+        scores = anchor_boxes[:,-1]
+        inds = np.where(scores > thresh)[0]
+        cls_scores = scores[inds]
+
+        # push new scores onto the minheap
+        for val in cls_scores:
+            heapq.heappush(top_scores, val)
+        # if we've collected more than the max number of anchors,
+        # then pop items off the minheap and update the threshold
+        if len(top_scores) > max_per_set:
+            while len(top_scores) > max_per_set:
+                heapq.heappop(top_scores)
+            thresh = top_scores[0]
+
+        _t['im_prop'].toc() 
+        print 'im_tune: {:d}/{:d} {:.3f}s' \
+              .format(i + 1, num_images, _t['im_prop'].average_time)
+        
+    print 'the threshold is set to {0}'.format(thresh) 
+    
+    outfile = os.path.join(output_dir, 'thresh.pkl')
+    with open(outfile, 'wb') as f:
+        cPickle.dump(thresh, f, cPickle.HIGHEST_PROTOCOL)
+
 def test_proposals(net, imdb):
     """The purpose of this function is to record all information necessary for
     fine-grained analysis: including ground truths, proposals, and all anchor regions..."""
@@ -324,7 +375,6 @@ def test_proposals(net, imdb):
     prop_boxes = np.zeros((num_images,), dtype=np.object)
     anchor_boxes = np.zeros((num_images,), dtype=np.object)
     gt_boxes = np.zeros((num_images,), dtype=np.object)
-    ss_boxes = np.zeros((num_images,), dtype=np.object)
     fn = np.zeros((num_images,), dtype=np.object)
     im_shapes = np.zeros((num_images,), dtype=np.object)
 
@@ -348,16 +398,12 @@ def test_proposals(net, imdb):
         _t['im_prop'].toc()
     
         gt_boxes[i] = gt_roidb[i]['boxes']
-        fn[i] = imdb.image_path_at(i)
+        fn[i] = os.path.basename(imdb.image_path_at(i))
         
         gt_overlaps = roidb[i]['gt_overlaps'].toarray()        
         # max overlap with gt over classes (columns)
         max_overlaps = gt_overlaps.max(axis=1)
-        # find out ground truths
-        ss_inds = np.where(max_overlaps < 1)[0]
-        ss_boxes[i] = roidb[i]['boxes'][ss_inds, :]
-
-        print 'im_detect: {:d}/{:d} {:.3f}s' \
+        print 'im_prop: {:d}/{:d} {:.3f}s' \
               .format(i + 1, num_images, _t['im_prop'].average_time)
         
     Tz = cfg.SEAR.Tz
@@ -370,5 +416,4 @@ def test_proposals(net, imdb):
                               fn = fn,
                               Tz = Tz,
                               num_proposals = num_proposals,
-                              im_shapes = im_shapes,
-                              ss_boxes = ss_boxes))
+                              im_shapes = im_shapes))

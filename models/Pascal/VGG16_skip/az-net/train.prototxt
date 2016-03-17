@@ -142,11 +142,11 @@ layer {
   bottom: "pool2"
   top: "conv3_1"
   param {
-    lr_mult: 0
-    decay_mult: 0
+    lr_mult: 1
+    decay_mult: 1
   }
   param {
-    lr_mult: 0
+    lr_mult: 2
     decay_mult: 0
   }
   convolution_param {
@@ -167,11 +167,11 @@ layer {
   bottom: "conv3_1"
   top: "conv3_2"
   param {
-    lr_mult: 0
-    decay_mult: 0
+    lr_mult: 1
+    decay_mult: 1
   }
   param {
-    lr_mult: 0
+    lr_mult: 2
     decay_mult: 0
   }
   convolution_param {
@@ -192,11 +192,11 @@ layer {
   bottom: "conv3_2"
   top: "conv3_3"
   param {
-    lr_mult: 0
-    decay_mult: 0
+    lr_mult: 1
+    decay_mult: 1
   }
   param {
-    lr_mult: 0
+    lr_mult: 2
     decay_mult: 0
   }
   convolution_param {
@@ -228,11 +228,11 @@ layer {
   bottom: "pool3"
   top: "conv4_1"
   param {
-    lr_mult: 0
-    decay_mult: 0
+    lr_mult: 1
+    decay_mult: 1
   }
   param {
-    lr_mult: 0
+    lr_mult: 2
     decay_mult: 0
   }
   convolution_param {
@@ -253,11 +253,11 @@ layer {
   bottom: "conv4_1"
   top: "conv4_2"
   param {
-    lr_mult: 0
-    decay_mult: 0
+    lr_mult: 1
+    decay_mult: 1
   }
   param {
-    lr_mult: 0
+    lr_mult: 2
     decay_mult: 0
   }
   convolution_param {
@@ -278,11 +278,11 @@ layer {
   bottom: "conv4_2"
   top: "conv4_3"
   param {
-    lr_mult: 0
-    decay_mult: 0
+    lr_mult: 1
+    decay_mult: 1
   }
   param {
-    lr_mult: 0
+    lr_mult: 2
     decay_mult: 0
   }
   convolution_param {
@@ -314,11 +314,11 @@ layer {
   bottom: "pool4"
   top: "conv5_1"
   param {
-    lr_mult: 0
-    decay_mult: 0
+    lr_mult: 1
+    decay_mult: 1
   }
   param {
-    lr_mult: 0
+    lr_mult: 2
     decay_mult: 0
   }
   convolution_param {
@@ -339,11 +339,11 @@ layer {
   bottom: "conv5_1"
   top: "conv5_2"
   param {
-    lr_mult: 0
-    decay_mult: 0
+    lr_mult: 1
+    decay_mult: 1
   }
   param {
-    lr_mult: 0
+    lr_mult: 2
     decay_mult: 0
   }
   convolution_param {
@@ -364,11 +364,11 @@ layer {
   bottom: "conv5_2"
   top: "conv5_3"
   param {
-    lr_mult: 0
-    decay_mult: 0
+    lr_mult: 1
+    decay_mult: 1
   }
   param {
-    lr_mult: 0
+    lr_mult: 2
     decay_mult: 0
   }
   convolution_param {
@@ -615,4 +615,3 @@ layer {
   top: "loss_zoom"
   loss_weight: 1
 }
-

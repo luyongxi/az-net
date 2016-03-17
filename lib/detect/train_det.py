@@ -42,19 +42,16 @@ class SolverWrapper(object):
             print ('Loading pretrained model '
                    'weights from {:s}').format(pretrained_model)
             self.solver.net.copy_from(pretrained_model)
-            
-        net = self.solver.net
-        if cfg.TRAIN.RENORMALIZE:
-            print 'Re-normalizing previously un-normalized weights'
-            if cfg.TRAIN.BBOX_REG:
-                
-                # scale and shift with bbox reg re-normalization
-                net.params['bbox_pred'][0].data[...] = \
-                        (net.params['bbox_pred'][0].data /
-                         (self.bbox_stds[:, np.newaxis] + cfg.EPS))
-                net.params['bbox_pred'][1].data[...] = \
-                        ((net.params['bbox_pred'][1].data - self.bbox_means)
-                         / (self.bbox_stds + cfg.EPS))
+
+        if cfg.TRAIN.BBOX_REG and cfg.TRAIN.UN_NORMALIZE:
+            # scale and shift with bbox reg re-normalization
+            net = self.solver.net
+            net.params['bbox_pred'][0].data[...] = \
+                    (net.params['bbox_pred'][0].data /
+                     (self.bbox_stds[:, np.newaxis] + cfg.EPS))
+            net.params['bbox_pred'][1].data[...] = \
+                    ((net.params['bbox_pred'][1].data - self.bbox_means)
+                     / (self.bbox_stds + cfg.EPS))
 
         self.solver_param = caffe_pb2.SolverParameter()
         with open(solver_prototxt, 'rt') as f:

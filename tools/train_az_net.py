@@ -15,7 +15,7 @@
 
 import _init_paths
 from detect.train_az import get_training_roidb, train_net
-from detect.config import cfg, cfg_from_file, get_output_dir
+from detect.config import cfg, cfg_from_file, get_output_dir, cfg_set_mode, cfg_set_path
 from datasets.factory import get_imdb
 import caffe
 import argparse
@@ -49,6 +49,12 @@ def parse_args():
     parser.add_argument('--rand', dest='randomize',
                         help='randomize (do not use a fixed seed)',
                         action='store_true')
+    parser.add_argument('--norm', dest='normalize',
+                        help='to un-normalize (use when pre-trained model is normalized)',
+                        action='store_true')
+    parser.add_argument('--exp', dest='exp_dir',
+                        help='experiment path',
+                        default='None', type=str)
 
     if len(sys.argv) == 1:
         parser.print_help()
@@ -66,6 +72,10 @@ if __name__ == '__main__':
     if args.cfg_file is not None:
         cfg_from_file(args.cfg_file)
 
+    cfg_set_path(args.exp_dir)
+
+    cfg_set_mode('Train')
+
     print('Using config:')
     pprint.pprint(cfg)
 
@@ -73,6 +83,11 @@ if __name__ == '__main__':
         # fix the random seeds (numpy and caffe) for reproducibility
         np.random.seed(cfg.RNG_SEED)
         caffe.set_random_seed(cfg.RNG_SEED)
+    
+    if args.normalize:
+        cfg.TRAIN.UN_NORMALIZE = True
+    else:
+        cfg.TRAIN.UN_NORMALIZE = False
 
     # set up caffe
     caffe.set_mode_gpu()
