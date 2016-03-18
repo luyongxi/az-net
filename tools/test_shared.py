@@ -42,7 +42,7 @@ def parse_args():
                         help='prototxt file defining the fully-connected layers of AZ-Net network',
                         default=None, type=str)
     parser.add_argument('--net_az', dest='caffemodel_az',
-                        help='SC-Net model to test',
+                        help='AZ-Net model to test',
                         default=None, type=str)      
     parser.add_argument('--cfg', dest='cfg_file',
                         help='optional config file', default=None, type=str)
@@ -59,7 +59,7 @@ def parse_args():
                         default=None, type=str)
     parser.add_argument('--exp', dest='exp_dir',
                         help='experiment path',
-                        default='None', type=str)
+                        default=None, type=str)
 
     if len(sys.argv) == 1:
         parser.print_help()

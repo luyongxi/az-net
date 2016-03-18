@@ -50,7 +50,7 @@ def parse_args():
                         action='store_true')
     parser.add_argument('--exp', dest='exp_dir',
                         help='experiment path',
-                        default='None', type=str)
+                        default=None, type=str)
 
     if len(sys.argv) == 1:
         parser.print_help()
