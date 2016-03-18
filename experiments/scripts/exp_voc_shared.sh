@@ -69,7 +69,7 @@ time ./tools/train_az_net.py --gpu $gpu_id \
 
 time ./tools/train_det_net.py --gpu $gpu_id \
   --solver models/Pascal/VGG16/frcnn/shared/solver_"$prefix".prototxt \
-  --weights output/$prefix/voc_2007_trainval/vgg16_fast_rcnn_iter_80000.caffemodel \
+  --weights output/$prefix/$trainset/vgg16_fast_rcnn_iter_80000.caffemodel \
   --def models/Pascal/VGG16/az-net/test.prototxt \
   --def_fc models/Pascal/VGG16/az-net/test_fc.prototxt \
   --net output/$prefix/$trainset/vgg16_az_net_shared_iter_160000.caffemodel \
