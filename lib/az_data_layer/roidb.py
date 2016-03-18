@@ -56,10 +56,10 @@ def prepare_roidb(imdb):
         roidb[i]['ex_boxes'] = ex_rois.astype(np.float32, copy=False)
         roidb[i]['gt_boxes'] = gt_rois.astype(np.float32, copy=False)
         
-        assert np.all(roidb[i]['ex_boxes'][:, 0] < roidb[i]['ex_boxes'][:, 2] ), 'error in ex_width id={0}'.format(i)
-        assert np.all(roidb[i]['ex_boxes'][:, 1] < roidb[i]['ex_boxes'][:, 3] ), 'error in ex_height id={0}'.format(i)
-        assert np.all(roidb[i]['gt_boxes'][:, 0] < roidb[i]['gt_boxes'][:, 2] ), 'error in gt_width id={0}'.format(i)
-        assert np.all(roidb[i]['gt_boxes'][:, 1] < roidb[i]['gt_boxes'][:, 3] ), 'error in gt_height id={0}'.format(i)
+        assert np.all(roidb[i]['ex_boxes'][:, 0] <= roidb[i]['ex_boxes'][:, 2] ), 'error in ex_width id={0}'.format(i)
+        assert np.all(roidb[i]['ex_boxes'][:, 1] <= roidb[i]['ex_boxes'][:, 3] ), 'error in ex_height id={0}'.format(i)
+        assert np.all(roidb[i]['gt_boxes'][:, 0] <= roidb[i]['gt_boxes'][:, 2] ), 'error in gt_width id={0}'.format(i)
+        assert np.all(roidb[i]['gt_boxes'][:, 1] <= roidb[i]['gt_boxes'][:, 3] ), 'error in gt_height id={0}'.format(i)
     
     if cfg.TRAIN.USE_CACHE:
         with open(cache_file, 'wb') as fid:
