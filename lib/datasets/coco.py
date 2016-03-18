@@ -170,10 +170,10 @@ class coco(datasets.imdb):
         for ix in xrange(num_objs):
             bbox = anns[ix]['bbox']
             # from (x,y,w,h) format to (x1,y1,x2,y2) format
-            x1 = min(width-1, max(0, float(bbox[0])))
-            y1 = min(height-1, max(0, float(bbox[1])))
-            x2 = min(width-1, x1 + max(0, bbox[2]))
-            y2 = min(height-1, y1 + max(0, bbox[3]))
+            x1 = min(width-1.0, max(0.0, float(bbox[0])))
+            y1 = min(height-1.0, max(0.0, float(bbox[1])))
+            x2 = min(width-1.0, x1 + max(0.0, float(bbox[2])))
+            y2 = min(height-1.0, y1 + max(0.0, float(bbox[3])))
             
             # object class
             category_id = anns[ix]['category_id']
