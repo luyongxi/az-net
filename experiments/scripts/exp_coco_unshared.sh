@@ -40,7 +40,7 @@ echo Using prefix "$prefix"
 echo Training set "$trainset", test set "$testset"
 echo Logging output to "$LOG"
 
-time ./tools/train_sc_net.py --gpu $gpu_id \
+time ./tools/train_az_net.py --gpu $gpu_id \
   --solver models/COCO/VGG16/az-net/solver_"$prefix".prototxt \
   --weights data/imagenet_models/VGG16.v2.caffemodel \
   --imdb $trainset \
