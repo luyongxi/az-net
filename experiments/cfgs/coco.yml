@@ -2,7 +2,6 @@
 # Training: COCO 2014 Train/Trainval
 # Skip: No
 # GPU: GTX 980 Ti
-EXP_DIR: default
 TRAIN:
   IMS_PER_BATCH: 1
   BATCH_SIZE: 256

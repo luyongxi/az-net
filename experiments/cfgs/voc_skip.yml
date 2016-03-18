@@ -3,8 +3,6 @@
 # Testing: VOC 2007 Test
 # Skip: Yes
 # GPU: GTX 980Ti
-
-EXP_DIR: default
 TRAIN:
   IMS_PER_BATCH: 1
   BATCH_SIZE: 128
