@@ -2,8 +2,8 @@
 
 # usage: exp_coco_unshared gpu-id config-file prefix train-set test-set
 # default prefix: default
-# default train set: coco_trainval_2014
-# default test set: coco_test-dev_2015
+# default train set: coco_2014_trainval
+# default test set: coco_2015_test-dev
 
 gpu_id=$1
 cfg_file=$2

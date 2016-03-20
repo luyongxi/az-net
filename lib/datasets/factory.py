@@ -16,14 +16,14 @@ import numpy as np
 # Set up COCO 2014 dataset
 for year in ['2014']:
     for split in ['train','val','test','trainval']:
-        name = 'coco_{}_{}'.format(split, year)
+        name = 'coco_{}_{}'.format(year, split)
         __sets[name] = (lambda split=split, year=year:
                 datasets.coco(split, year))
 
 # Set up COCO 2015 dataset
 for year in ['2015']:
     for split in ['test','test-dev']:
-        name = 'coco_{}_{}'.format(split, year)
+        name = 'coco_{}_{}'.format(year, split)
         __sets[name] = (lambda split=split, year=year:
                 datasets.coco(split, year))
 
