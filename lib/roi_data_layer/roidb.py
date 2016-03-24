@@ -85,8 +85,8 @@ def prepare_roidb(imdb, net):
             ex_rois, prop[i] = _compute_ex_rois_with_net(im, net, gt_rois)
         
         prop[i] = prop[i].astype(np.uint16, copy=False)
-        roidb[i]['ex_boxes'] = ex_rois.astype(np.uint16, copy=False)
-        roidb[i]['gt_boxes'] = gt_rois.astype(np.uint16, copy=False)
+        roidb[i]['ex_boxes'] = ex_rois.astype(np.float32, copy=False)
+        roidb[i]['gt_boxes'] = gt_rois.astype(np.float32, copy=False)
         
         # sanity checks
         # gt boxes => class should not be zero (must be a fg class)
