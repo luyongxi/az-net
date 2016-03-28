@@ -295,10 +295,10 @@ def im_propose(net, im):
         # Z is updated to regions for zoom in
         indZ = np.where(zoom >= Tz)[0]
         Z = B[indZ, :]
-        if Z.shape[0] == 0:
-            break
         # anchor region history
         Bhis = np.vstack((Bhis, np.hstack((B, zoom[:, np.newaxis]))))
+        if Z.shape[0] == 0:
+            break
         # B is updated to be regions that are expanded from it
         B = divide_region(Z)
         
