@@ -26,12 +26,15 @@ def prepare_roidb(imdb):
     """
     cache_file = os.path.join(imdb.cache_path, 
                               imdb.name + '_trainable_roidb.pkl')
+    use_cache = False
     if cfg.TRAIN.USE_CACHE and os.path.exists(cache_file):
         with open(cache_file, 'rb') as fid:
-            roidb = cPickle.load(fid)
-            imdb.set_roidb(roidb)
-        print '{} roidb (trainable) loaded from {}'.format(imdb.name, cache_file)
-        return
+            caches = cPickle.load(fid)
+            zoom_gt = caches['zoom_gt']
+	    ex_boxes = caches['ex_boxes']
+	    gt_boxes = caches['gt_boxes']
+            use_cache = True
+        print '{} trainable caches loaded from {}'.format(imdb.name, cache_file)
     
     roidb = imdb.roidb
     for i in xrange(len(imdb.image_index)):
@@ -39,45 +42,53 @@ def prepare_roidb(imdb):
             print 'Processing {}/{} ...'.format(i, len(imdb.image_index))        
         
         roidb[i]['image'] = imdb.image_path_at(i)
-        # need gt_overlaps as a dense array for argmax
-        gt_overlaps = roidb[i]['gt_overlaps'].toarray()        
-        # max overlap with gt over classes (columns)
-        max_overlaps = gt_overlaps.max(axis=1)
-        # find out ground truths
-        gt_inds = np.where(max_overlaps == 1)[0]
-        gt_rois = roidb[i]['boxes'][gt_inds, :]
+       
+	if use_cache:
+	    roidb[i]['zoom_gt'] = zoom_gt[i]
+	    roidb[i]['ex_boxes'] = ex_boxes[i]
+	    roidb[i]['gt_boxes'] = gt_boxes[i]
+	else:
+	    # need gt_overlaps as a dense array for argmax
+            gt_overlaps = roidb[i]['gt_overlaps'].toarray()        
+            # max overlap with gt over classes (columns)
+            max_overlaps = gt_overlaps.max(axis=1)
+            # find out ground truths
+            gt_inds = np.where(max_overlaps == 1)[0]
+            gt_boxes = roidb[i]['boxes'][gt_inds, :]
         
-        # generate training rois, based on
-        #    (1) image size
-        #    (2) ground truth boxes
-        ex_rois, zb = _compute_ex_rois(imdb.image_size(i), gt_rois)
+            # generate training rois, based on
+            #    (1) image size
+            #    (2) ground truth boxes
+            ex_boxes, zoom_gt = _compute_ex_rois(imdb.image_size(i), gt_boxes)
         
-        roidb[i]['zoom_gt'] = zb.astype(np.bool, copy=False)
-        roidb[i]['ex_boxes'] = ex_rois.astype(np.float32, copy=False)
-        roidb[i]['gt_boxes'] = gt_rois.astype(np.float32, copy=False)
+            roidb[i]['zoom_gt'] = zoom_gt.astype(np.bool, copy=False)
+            roidb[i]['ex_boxes'] = ex_boxes.astype(np.float32, copy=False)
+            roidb[i]['gt_boxes'] = gt_boxes.astype(np.float32, copy=False)
         
         assert np.all(roidb[i]['ex_boxes'][:, 0] <= roidb[i]['ex_boxes'][:, 2] ), 'error in ex_width id={0}'.format(i)
         assert np.all(roidb[i]['ex_boxes'][:, 1] <= roidb[i]['ex_boxes'][:, 3] ), 'error in ex_height id={0}'.format(i)
         assert np.all(roidb[i]['gt_boxes'][:, 0] <= roidb[i]['gt_boxes'][:, 2] ), 'error in gt_width id={0}'.format(i)
         assert np.all(roidb[i]['gt_boxes'][:, 1] <= roidb[i]['gt_boxes'][:, 3] ), 'error in gt_height id={0}'.format(i)
     
-    if cfg.TRAIN.USE_CACHE:
+    if cfg.TRAIN.USE_CACHE and (not os.path.exists(cache_file)):
         with open(cache_file, 'wb') as fid:
-            cPickle.dump(roidb, fid, cPickle.HIGHEST_PROTOCOL)
-            print 'wrote roidb (trainable) to {}'.format(cache_file)
+	    caches = {'zoom_gt': zoom_gt, 'ex_boxes': ex_boxes, 'gt_boxes': gt_boxes}
+            cPickle.dump(caches, fid, cPickle.HIGHEST_PROTOCOL)
+            print 'wrote trainable caches to {}'.format(cache_file)
 
 def add_adjacent_prediction_targets(imdb):
     """Add information needed to train adjacency predictors."""
     cache_file = os.path.join(imdb.cache_path, 
                               imdb.name + '_targets_roidb.pkl')
+    use_cache = False
     if cfg.TRAIN.USE_CACHE and os.path.exists(cache_file):
         with open(cache_file, 'rb') as fid:
             caches = cPickle.load(fid)
-            imdb.set_roidb(caches['roidb'])
-            means = caches['means']
+            bbox_targets = caches['bbox_targets']
+	    means = caches['means']
             stds = caches['stds']
-        print '{} roidb (targetes) loaded from {}'.format(imdb.name, cache_file)
-        return means.ravel(), stds.ravel()
+	    use_cache = True
+        print '{} targets cache loaded from {}'.format(imdb.name, cache_file)
     
     roidb = imdb.roidb
     assert len(roidb) > 0
@@ -89,40 +100,44 @@ def add_adjacent_prediction_targets(imdb):
     for im_i in xrange(num_images):
         if im_i % 10000 == 0:
             print 'Processing {}/{} ...'.format(im_i, num_images)
-        gt_rois = roidb[im_i]['gt_boxes']
-        ex_rois = roidb[im_i]['ex_boxes']
-        roidb[im_i]['bbox_targets'] = _compute_targets(gt_rois, ex_rois)
+	if use_cache:
+            roidb[im_i]['bbox_targets'] = bbox_targets[im_i]
+	else:
+	    gt_rois = roidb[im_i]['gt_boxes']
+            ex_rois = roidb[im_i]['ex_boxes']
+            roidb[im_i]['bbox_targets'] = _compute_targets(gt_rois, ex_rois)
     
     # Compute values needed for means and stds
     # var(x) = E(x^2) - E(x)^2
-    class_counts = np.zeros((num_classes, 1)) + cfg.EPS
-    sums = np.zeros((num_classes, 4))
-    squared_sums = np.zeros((num_classes, 4))
-    for im_i in xrange(num_images):
-        targets = roidb[im_i]['bbox_targets']
-        for cls in xrange(num_classes):
-            cls_inds = np.where(targets[:,-2] == cls)[0]
-            if len(cls_inds) > 0:
-                class_counts[cls] += len(cls_inds)            
-                sums[cls, :] += targets[cls_inds, 0:4].sum(axis=0)
-                squared_sums[cls, :] += (targets[cls_inds, 0:4] ** 2).sum(axis=0)
+    if not use_cache:
+    	class_counts = np.zeros((num_classes, 1)) + cfg.EPS
+    	sums = np.zeros((num_classes, 4))
+    	squared_sums = np.zeros((num_classes, 4))
+    	for im_i in xrange(num_images):
+            targets = roidb[im_i]['bbox_targets']
+       	    for cls in xrange(num_classes):
+                cls_inds = np.where(targets[:,-2] == cls)[0]
+            	if len(cls_inds) > 0:
+                    class_counts[cls] += len(cls_inds)            
+                    sums[cls, :] += targets[cls_inds, 0:4].sum(axis=0)
+                    squared_sums[cls, :] += (targets[cls_inds, 0:4] ** 2).sum(axis=0)
 
-    means = sums / class_counts
-    stds = np.sqrt(squared_sums / class_counts - means ** 2)
+        means = sums / class_counts
+        stds = np.sqrt(squared_sums / class_counts - means ** 2)
 
-    # Normalize targets
-    for im_i in xrange(num_images):
-        targets = roidb[im_i]['bbox_targets']
-        for cls in xrange(num_classes):
-            cls_inds = np.where(targets[:,-2] == cls)[0]
-            roidb[im_i]['bbox_targets'][cls_inds, 0:4] -= means[cls, :]
-            roidb[im_i]['bbox_targets'][cls_inds, 0:4] /= stds[cls, :]
+	# Normalize targets
+        for im_i in xrange(num_images):
+            targets = roidb[im_i]['bbox_targets']
+            for cls in xrange(num_classes):
+                cls_inds = np.where(targets[:,-2] == cls)[0]
+                roidb[im_i]['bbox_targets'][cls_inds, 0:4] -= means[cls, :]
+                roidb[im_i]['bbox_targets'][cls_inds, 0:4] /= stds[cls, :]
             
-    if cfg.TRAIN.USE_CACHE:
+    if cfg.TRAIN.USE_CACHE and (not os.path.exists(cache_file)):
         with open(cache_file, 'wb') as fid:
-            caches = {'roidb': roidb, 'means': means, 'stds': stds}
+            caches = {'bbox_targets': bbox_targets, 'means': means, 'stds': stds}
             cPickle.dump(caches, fid, cPickle.HIGHEST_PROTOCOL)
-            print 'wrote roidb (targets) to {}'.format(cache_file)
+            print 'wrote targets cache to {}'.format(cache_file)
 
     # These values will be needed for making predictions
     # (the predicts will need to be unnormalized and uncentered)

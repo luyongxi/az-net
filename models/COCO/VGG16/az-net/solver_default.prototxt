@@ -1,5 +1,6 @@
 train_net: "models/COCO/VGG16/az-net/train.prototxt"
 base_lr: 0.001
+clip_gradients: 40
 lr_policy: "step"
 gamma: 0.1
 stepsize: 300000

@@ -9,8 +9,8 @@ gpu_id=$1
 cfg_file=$2
 
 prefix="default"
-trainset="coco_trainval_2014"
-testset="coco_test-dev_2015"
+trainset="coco_2014_trainval"
+testset="coco_2015_test-dev"
 
 if [ $# -eq 0 ]; then
   echo Usage: exp_coco_unshared gpu-id config-file prefix train-set test-set

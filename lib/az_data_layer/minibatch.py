@@ -135,6 +135,7 @@ def _get_image_blob(roidb, scale_inds):
     im_scales = []
     for i in xrange(num_images):
         im = cv2.imread(roidb[i]['image'])
+        assert (im is not None), 'image not found: {0}'.format(roidb[i]['image'])
         if roidb[i]['flipped']:
             im = im[:, ::-1, :]
         target_size = cfg.TRAIN.SCALES[scale_inds[i]]
