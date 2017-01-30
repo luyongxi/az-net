@@ -70,3 +70,7 @@ To install, use the following steps:
     ```
     $ROOT/experiments/scripts
     ```
+    
+## Pretrained Models
+You could obtain the pretrained models from the following link. 
+https://drive.google.com/drive/folders/0B2pXYeQwL9mhMlo0ZUVYcU82Ylk?usp=sharing
